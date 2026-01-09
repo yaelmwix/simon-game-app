@@ -713,24 +713,27 @@ function advanceSimonRound(io: Server, gameCode: string): void {
  * Process Simon round - award points, eliminate wrong answers (Step 4)
  */
 function processSimonRound(io: Server, gameCode: string): void {
-  const room = gameService.getRoom(gameCode);
-  if (!room || room.status !== 'active') {
-    console.log(`❌ processSimonRound: Room ${gameCode} not found or inactive`);
-    return;
-  }
-  
-  let gameState = room.gameState as SimonGameState;
-  if (!gameState || gameState.gameType !== 'simon') {
-    console.log(`❌ processSimonRound: Invalid game state for ${gameCode}`);
-    return;
-  }
-  
-  console.log(`🏁 Processing round ${gameState.round} for room ${gameCode}...`);
-  console.log(`   Submissions: ${Object.keys(gameState.submissions).length}`);
-  console.log(`   Active players: ${Object.values(gameState.playerStates).filter(s => s.status === 'playing').length}`);
-  
-  // Process submissions (find fastest, eliminate wrong)
-  const { gameState: newState, roundWinner, eliminations } = processRoundSubmissions(gameState);
+  try {
+    const room = gameService.getRoom(gameCode);
+    if (!room || room.status !== 'active') {
+      console.log(`❌ processSimonRound: Room ${gameCode} not found or inactive`);
+      return;
+    }
+    
+    let gameState = room.gameState as SimonGameState;
+    if (!gameState || gameState.gameType !== 'simon') {
+      console.log(`❌ processSimonRound: Invalid game state for ${gameCode}`);
+      return;
+    }
+    
+    console.log(`🏁 Processing round ${gameState.round} for room ${gameCode}...`);
+    console.log(`   Submissions:`, gameState.submissions);
+    console.log(`   Player states:`, gameState.playerStates);
+    
+    // Process submissions (find fastest, eliminate wrong)
+    console.log(`📤 Calling processRoundSubmissions...`);
+    const { gameState: newState, roundWinner, eliminations } = processRoundSubmissions(gameState);
+    console.log(`📥 processRoundSubmissions returned:`, { roundWinner, eliminationsCount: eliminations.length });
   gameService.updateGameState(gameCode, newState);
   
   // Prepare elimination data with player names
@@ -789,6 +792,10 @@ function processSimonRound(io: Server, gameCode: string): void {
     setTimeout(() => {
       advanceSimonRound(io, gameCode);
     }, 3000);
+  }
+  } catch (error) {
+    console.error(`❌ ERROR in processSimonRound for ${gameCode}:`, error);
+    console.error(`   Stack:`, (error as Error).stack);
   }
 }
 

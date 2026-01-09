@@ -188,6 +188,9 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
   // Track if audio is initialized
   const audioInitialized = useRef(false);
   
+  // Track the last round we animated to prevent re-running with same data
+  const lastAnimatedRound = useRef<number>(0);
+  
   // CRITICAL FIX: Use ref to track current sequence to avoid closure issues
   // When sequence prop changes between rounds, the ref ensures we always read the latest value
   // Update ref immediately (not in useEffect) to ensure it's always current
@@ -224,6 +227,14 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
     if (!isShowingSequence || sequence.length === 0) {
       setActiveColor(null);
       setSequenceIndex(-1);
+      lastAnimatedRound.current = 0; // Reset when not showing
+      return;
+    }
+
+    // CRITICAL: Only animate if this is a new round
+    // Prevent re-animating the same round (but allow if sequence length changed)
+    if (lastAnimatedRound.current === round) {
+      console.log(`🎨 Skipping animation - already animated round ${round} (current length: ${sequence.length})`);
       return;
     }
 
@@ -232,6 +243,7 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
     const sequenceLength = sequence.length;
     const sequenceToShow = [...sequence]; // Create a copy to ensure we have the exact sequence
     sequenceRef.current = sequenceToShow;
+    lastAnimatedRound.current = round; // Mark this round as animated
     
     console.log(`🎨 Starting sequence animation: Round ${round}, Length: ${sequenceLength}, Sequence:`, sequenceToShow);
 
@@ -256,7 +268,7 @@ export const CircularSimonBoard: React.FC<CircularSimonBoardProps> = ({
 
       // Use the captured sequence array
       const color = sequenceToShow[currentIndex];
-      console.log(`🎨 Showing color ${currentIndex + 1}/${currentSequence.length}: ${color}`);
+      console.log(`🎨 Showing color ${currentIndex + 1}/${sequenceLength}: ${color}`);
       setActiveColor(color);
       setSequenceIndex(currentIndex);
 

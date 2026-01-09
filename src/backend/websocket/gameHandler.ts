@@ -175,13 +175,16 @@ function registerPlatformHandlers(io: Server, socket: SocketWithSession): void {
       // Join socket room
       socket.join(gameCode);
       
-      // Notify others that player joined
-      socket.to(gameCode).emit('player_joined', player);
-      
-      // Send current room state
+      // Send initial room state to this player
       socket.emit('room_state', room);
       
-      console.log(`🏠 Socket joined: ${player.displayName} in room ${gameCode}`);
+      // Broadcast updated room state to ALL players (including this one)
+      io.to(gameCode).emit('room_state_update', room);
+      
+      // Also notify others for UI feedback (optional)
+      socket.to(gameCode).emit('player_joined', player);
+      
+      console.log(`🏠 Socket joined: ${player.displayName} in room ${gameCode} (${room.players.length} players)`);
     } catch (error) {
       console.error('❌ join_room_socket error:', error);
       socket.emit('error', { message: 'Failed to join room' });
@@ -205,13 +208,16 @@ function registerPlatformHandlers(io: Server, socket: SocketWithSession): void {
         // Notify others
         io.to(gameCode).emit('player_left', { playerId });
         
-        // Check if room still exists (might be deleted if empty)
+        // Broadcast updated room state to remaining players
         const room = gameService.getRoom(gameCode);
-        if (!room) {
+        if (room) {
+          io.to(gameCode).emit('room_state_update', room);
+        } else {
+          // Room is empty/closed
           io.to(gameCode).emit('room_closed');
         }
         
-        console.log(`👋 ${socket.displayName} left room ${gameCode}`);
+        console.log(`👋 ${socket.displayName} left room ${gameCode} (${room?.players.length || 0} players remaining)`);
       }
       
       // Clear socket session
@@ -702,9 +708,12 @@ function handleDisconnect(io: Server, socket: SocketWithSession): void {
         io.to(gameCode).emit('player_left', { playerId });
         console.log(`🗑️ ${displayName} removed after timeout`);
         
-        // Check if room still exists
+        // Broadcast updated room state to remaining players
         const room = gameService.getRoom(gameCode);
-        if (!room) {
+        if (room) {
+          io.to(gameCode).emit('room_state_update', room);
+        } else {
+          // Room is empty/closed
           io.to(gameCode).emit('room_closed');
         }
       }

@@ -59,9 +59,20 @@ export function WaitingRoomPage() {
       socket.emit('join_room_socket', { gameCode, playerId });
     }
     
-    // Listen for room state
-    socket.on('room_state', (room: any) => {
-      console.log('📦 Room state:', room);
+    // Listen for initial room state (ONCE to avoid race condition)
+    socket.once('room_state', (room: any) => {
+      console.log('📦 Initial room state:', room);
+      setPlayers(room.players || []);
+      setRoomStatus(room.status);
+      
+      // Check if we're the host
+      const me = room.players?.find((p: any) => p.id === playerId);
+      setIsHost(me?.isHost || false);
+    });
+    
+    // Listen for room state updates (when players join/leave)
+    socket.on('room_state_update', (room: any) => {
+      console.log('🔄 Room state updated:', room);
       setPlayers(room.players || []);
       setRoomStatus(room.status);
       
@@ -82,18 +93,26 @@ export function WaitingRoomPage() {
       }
     });
     
-    // Listen for player joined
+    // Listen for player joined (for real-time feedback)
     socket.on('player_joined', (player: any) => {
       console.log('👋 Player joined:', player);
-      setPlayers(prev => [...prev, player]);
+      // Don't modify state here - wait for room_state_update
+    });
+    
+    // Listen for player left
+    socket.on('player_left', (data: { playerId: string }) => {
+      console.log('👋 Player left:', data.playerId);
+      setPlayers(prev => prev.filter(p => p.id !== data.playerId));
     });
     
     // Cleanup on unmount
     return () => {
       cleanup();
       socket.off('room_state');
+      socket.off('room_state_update');
       socket.off('countdown');
       socket.off('player_joined');
+      socket.off('player_left');
     };
   }, [gameCode, playerId, initializeListeners, cleanup]);
   

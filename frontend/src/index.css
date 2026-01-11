@@ -3,20 +3,46 @@
 @tailwind utilities;
 
 /* =============================================================================
-   MOBILE-FIRST CSS RULES
-   Based on: .cursor/MOBILE_FIRST.md
+   RETRO SIMON SAYS - ARCADE STYLE
    ============================================================================= */
+
+/* Import retro fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  /* Retro color palette */
+  --neon-cyan: #00f5ff;
+  --neon-pink: #ff00ff;
+  --neon-yellow: #ffff00;
+  --neon-green: #00ff66;
+  --retro-purple: #6b21a8;
+  --retro-orange: #c2410c;
+  --retro-teal: #0d9488;
+  --crt-black: #0a0a0a;
+  --cream: #d4c4a8;
+  --cream-dark: #b8a88c;
+  --cream-light: #e8dcc8;
+  
+  /* Button colors */
+  --btn-red: #ef4444;
+  --btn-red-glow: #ff6b6b;
+  --btn-green: #22c55e;
+  --btn-green-glow: #4ade80;
+  --btn-blue: #3b82f6;
+  --btn-blue-glow: #60a5fa;
+  --btn-yellow: #eab308;
+  --btn-yellow-glow: #facc15;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Orbitron', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  /* Prevent overscroll bounce (iOS pull-to-refresh) */
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  background: var(--crt-black);
 }
 
 /* Prevent tap highlight flash on mobile */
@@ -51,6 +77,244 @@ textarea {
   font-size: 16px !important;
 }
 
+/* =============================================================================
+   GEOMETRIC BACKGROUND
+   ============================================================================= */
+
+.retro-bg {
+  background: 
+    linear-gradient(135deg, var(--retro-purple) 25%, transparent 25%),
+    linear-gradient(225deg, var(--retro-purple) 25%, transparent 25%),
+    linear-gradient(45deg, var(--retro-orange) 25%, transparent 25%),
+    linear-gradient(315deg, var(--retro-teal) 25%, var(--retro-orange) 25%);
+  background-size: 100px 100px;
+  background-position: 0 0, 50px 0, 50px -50px, 0 50px;
+  animation: bg-shift 20s ease infinite;
+}
+
+.retro-bg-static {
+  background: linear-gradient(135deg, 
+    var(--retro-orange) 0%, 
+    var(--retro-purple) 50%, 
+    var(--retro-teal) 100%
+  );
+  position: relative;
+}
+
+.retro-bg-static::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(45deg, transparent 45%, var(--retro-purple) 45%, var(--retro-purple) 55%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, var(--retro-teal) 45%, var(--retro-teal) 55%, transparent 55%);
+  background-size: 60px 60px;
+  opacity: 0.5;
+}
+
+@keyframes bg-shift {
+  0%, 100% { background-position: 0 0, 50px 0, 50px -50px, 0 50px; }
+  50% { background-position: 50px 50px, 100px 50px, 100px 0, 50px 100px; }
+}
+
+/* =============================================================================
+   CRT TV FRAME EFFECT
+   ============================================================================= */
+
+.crt-frame {
+  position: relative;
+  border-radius: 20px;
+  box-shadow: 
+    inset 0 0 100px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 0, 0, 0.8),
+    0 10px 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.crt-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.03) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.crt-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  pointer-events: none;
+  z-index: 99;
+}
+
+/* =============================================================================
+   NEON TEXT EFFECTS
+   ============================================================================= */
+
+.neon-text {
+  font-family: 'Press Start 2P', cursive;
+  text-shadow: 
+    0 0 5px currentColor,
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+  animation: neon-flicker 3s infinite;
+}
+
+.neon-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 
+    0 0 5px var(--neon-cyan),
+    0 0 10px var(--neon-cyan),
+    0 0 20px var(--neon-cyan),
+    0 0 40px var(--neon-cyan);
+}
+
+.neon-pink {
+  color: var(--neon-pink);
+  text-shadow: 
+    0 0 5px var(--neon-pink),
+    0 0 10px var(--neon-pink),
+    0 0 20px var(--neon-pink),
+    0 0 40px var(--neon-pink);
+}
+
+@keyframes neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    opacity: 0.8;
+  }
+}
+
+/* =============================================================================
+   RETRO BUTTONS
+   ============================================================================= */
+
+.retro-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 24px;
+  border: 2px solid;
+  border-radius: 25px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.retro-btn-cyan {
+  color: var(--neon-cyan);
+  border-color: var(--neon-cyan);
+  box-shadow: 
+    0 0 10px var(--neon-cyan),
+    inset 0 0 10px rgba(0, 245, 255, 0.1);
+}
+
+.retro-btn-cyan:hover {
+  background: rgba(0, 245, 255, 0.2);
+  box-shadow: 
+    0 0 20px var(--neon-cyan),
+    0 0 40px var(--neon-cyan),
+    inset 0 0 20px rgba(0, 245, 255, 0.2);
+}
+
+.retro-btn-pink {
+  color: var(--neon-pink);
+  border-color: var(--neon-pink);
+  box-shadow: 
+    0 0 10px var(--neon-pink),
+    inset 0 0 10px rgba(255, 0, 255, 0.1);
+}
+
+.retro-btn-pink:hover {
+  background: rgba(255, 0, 255, 0.2);
+  box-shadow: 
+    0 0 20px var(--neon-pink),
+    0 0 40px var(--neon-pink),
+    inset 0 0 20px rgba(255, 0, 255, 0.2);
+}
+
+/* =============================================================================
+   LCD SCORE DISPLAY
+   ============================================================================= */
+
+.lcd-display {
+  font-family: 'Orbitron', monospace;
+  background: #1a1a2e;
+  border: 2px solid #333;
+  border-radius: 4px;
+  padding: 8px 16px;
+  color: #00ff88;
+  text-shadow: 0 0 10px #00ff88;
+  letter-spacing: 2px;
+}
+
+/* =============================================================================
+   GAME BUTTON 3D EFFECT
+   ============================================================================= */
+
+.game-btn-3d {
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 
+    inset 0 -8px 20px rgba(0, 0, 0, 0.4),
+    inset 0 8px 20px rgba(255, 255, 255, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.game-btn-3d:active {
+  transform: scale(0.95);
+  box-shadow: 
+    inset 0 -4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 4px 10px rgba(255, 255, 255, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-btn-3d.active {
+  box-shadow: 
+    inset 0 -8px 20px rgba(0, 0, 0, 0.2),
+    inset 0 8px 20px rgba(255, 255, 255, 0.4),
+    0 0 30px currentColor,
+    0 0 60px currentColor;
+  filter: brightness(1.5);
+}
+
+/* =============================================================================
+   SPEAKER GRILLE
+   ============================================================================= */
+
+.speaker-grille {
+  background: repeating-linear-gradient(
+    0deg,
+    #1a1a1a,
+    #1a1a1a 2px,
+    #333 2px,
+    #333 4px
+  );
+  border-radius: 50%;
+}
+
+/* =============================================================================
+   ANIMATIONS
+   ============================================================================= */
+
 @keyframes slide-in {
   from {
     transform: translateX(100%);
@@ -64,4 +328,49 @@ textarea {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 40px currentColor, 0 0 60px currentColor;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.star-icon {
+  animation: star-twinkle 2s ease-in-out infinite;
+}
+
+/* =============================================================================
+   INPUT STYLING
+   ============================================================================= */
+
+.retro-input {
+  font-family: 'Orbitron', monospace;
+  background: #0a0a1a;
+  border: 2px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  padding: 10px 16px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  outline: none;
+}
+
+.retro-input:focus {
+  box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+.retro-input::placeholder {
+  color: rgba(0, 245, 255, 0.4);
 }
